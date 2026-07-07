@@ -6,25 +6,24 @@
   <title>반석고 전공진로 보고서 작성 및 수합 시스템</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts (Noto Sans KR) & Pretendard Webfont (초깔끔 현대적 서체) -->
+  <!-- Pretendard Webfont (초깔끔 현대적 서체) -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
   <!-- JSZip Library for Zipping files client-side -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   
   <style>
     body {
-      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       letter-spacing: -0.02em;
     }
     
-    /* 세련되고 정밀한 프리뷰 문서용 스타일 패치 */
+    /* 실제 출력될 한글 HWP 규격에 맞춘 격자선과 간격 디자인 */
     .hwp-document {
       font-family: 'Pretendard', -apple-system, sans-serif;
       line-height: 1.625;
       color: #1e293b;
     }
     
-    /* 얇고 정교한 한글 정형 격자선 */
     .hwp-table {
       border: 1.5px solid #0f172a;
     }
@@ -32,7 +31,6 @@
       border: 1px solid #334155;
     }
     
-    /* 인쇄 최적화 설정 */
     @media print {
       body {
         background-color: #ffffff;
@@ -54,7 +52,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- Top Navigation & Tab Bar (no-print) -->
+  <!-- Header (no-print) -->
   <header class="bg-slate-900 text-white shadow-sm no-print sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row justify-between items-center gap-3">
       <div class="flex items-center gap-3">
@@ -131,41 +129,44 @@
                 <span>1. 활동 내용 요약 및 가장 흥미로웠던 점 *</span>
                 <span class="text-[10px] text-slate-400 font-normal">구체적 학습 및 호기심 내용</span>
               </label>
-              <textarea id="summary" rows="4" oninput="onFormChange()" placeholder="특강 내용 중 가장 기억에 남는 핵심 개념이나 전공 공부 등을 요약하고, 본인의 호기심을 가장 자극했던 부분을 구체적으로 기술하세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none leading-relaxed"></textarea>
+              <textarea id="summary" rows="4" oninput="onFormChange()" placeholder="특강 내용 중 가장 기억에 남는 핵심 개념이나 대학생 선배들의 멘토링 내용(대학 생활, 전공 공부 등)을 요약하고, 본인의 호기심을 가장 자극했던 부분을 구체적으로 기술하세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none leading-relaxed"></textarea>
             </div>
 
             <div>
               <label class="block text-[11px] font-bold text-slate-600 mb-1 flex justify-between">
                 <span>2. 희망 진로, 관심 분야와의 연계성 및 향후 탐색 계획 *</span>
-                <span class="text-[10px] text-slate-400 font-normal">도서 연계, 후속 심화 탐구 계획 등</span>
+                <span class="text-[10px] text-slate-400 font-normal">독서 연계, 후속 심화 탐구 계획 등 기술</span>
               </label>
-              <textarea id="connection" rows="4" oninput="onFormChange()" placeholder="이번 특강 내용이 본인의 희망 진로와 어떻게 연결되는지 쓰고, 이를 바탕으로 한 가상/실제 후속 탐구(독서 연계 등) 방향을 기록하세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none leading-relaxed"></textarea>
+              <textarea id="connection" rows="4" oninput="onFormChange()" placeholder="이번 특강 내용이 평소 본인의 진로 희망이나 관심 분야와 어떻게 연결되는지 기술하세요. 또한 새롭게 생겨난 의문점이나 앞으로 더 알아보고 싶은 주제(독서, 수행평가 연계 등)를 기술하세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none leading-relaxed"></textarea>
             </div>
 
             <div>
-              <label class="block text-[11px] font-bold text-slate-600 mb-1">3. 성찰 및 다짐 *</label>
-              <textarea id="reflection" rows="3" oninput="onFormChange()" placeholder="활동을 마무리하며 변화된 진로 인식, 깨달음, 향후 학교생활에 대한 포부 및 진지한 다짐을 자유롭게 서술해 주십시오." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none leading-relaxed"></textarea>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1 flex justify-between">
+                <span>3. 성찰 및 다짐 *</span>
+                <span class="text-[10px] text-slate-400 font-normal">생각이나 태도의 '변화' 서술</span>
+              </label>
+              <textarea id="reflection" rows="3" oninput="onFormChange()" placeholder="특강을 듣기 전과 후, 나의 생각이나 진로를 대하는 태도에 어떤 '변화'가 생겼는지 기술하세요. 대학 진학이나 학교생활에 임하는 진지한 다짐을 서술하십시오." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none leading-relaxed"></textarea>
             </div>
             
             <div class="border-t pt-4">
               <label class="block text-[11px] font-bold text-slate-700 mb-1">4. 특강 연계 진로 심화 탐구 (선택항목)</label>
               <div class="flex gap-2 mb-2">
-                <button onclick="changeDeepdiveType('type1')" id="type-btn-1" class="flex-1 text-[11px] py-1.5 border border-emerald-600 bg-emerald-50 text-emerald-800 font-bold rounded-lg">① 진로 일치형</button>
-                <button onclick="changeDeepdiveType('type2')" id="type-btn-2" class="flex-1 text-[11px] py-1.5 border border-slate-200 bg-white text-slate-600 rounded-lg">② 진로 융합형</button>
-                <button onclick="changeDeepdiveType('type3')" id="type-btn-3" class="flex-1 text-[11px] py-1.5 border border-slate-200 bg-white text-slate-600 rounded-lg">③ 진로 탐색형</button>
+                <button onclick="changeDeepdiveType('type1')" id="type-btn-1" class="flex-1 text-[11px] py-1.5 border border-emerald-600 bg-emerald-50 text-emerald-800 font-bold rounded-lg font-medium">① 진로 일치형</button>
+                <button onclick="changeDeepdiveType('type2')" id="type-btn-2" class="flex-1 text-[11px] py-1.5 border border-slate-200 bg-white text-slate-600 rounded-lg font-medium">② 진로 융합형</button>
+                <button onclick="changeDeepdiveType('type3')" id="type-btn-3" class="flex-1 text-[11px] py-1.5 border border-slate-200 bg-white text-slate-600 rounded-lg font-medium">③ 진로 탐색형</button>
               </div>
-              <p id="type-help" class="text-[10px] text-slate-500 bg-slate-50 p-2 rounded-lg border mb-2 leading-relaxed">
-                <strong>진로 일치형:</strong> 특강 내용 중 더 깊이 알고 싶은 핵심 개념이나 기술을 선정하여 전공 서적, 논문, 기사 등을 활용해 심층 탐구한 내용을 기록합니다.
+              <p id="type-help" class="text-[10px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border mb-2 leading-relaxed">
+                <strong>① [진로 일치형]</strong> 이번 특강이 내 진로와 잘 맞는 경우: 특강 내용 중 더 깊이 알고 싶은 핵심 개념이나 기술을 선정하여, 관련 전공 도서나 학술 기사를 찾아 읽고 심화 탐구한 내용을 적어주세요.
               </p>
-              <textarea id="deepdive" rows="5" oninput="onFormChange()" placeholder="선택한 유형에 맞추어 도서, 학술 논문, 칼럼 등을 연계 조사하여 밝혀낸 심화 사실과 분석 내용을 적으세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none leading-relaxed"></textarea>
+              <textarea id="deepdive" rows="5" oninput="onFormChange()" placeholder="선택한 유형에 따라 관련 도서, 기사, 영상, 칼럼 등을 연계 분석하여 알게 된 점과 본인의 생각을 적어주세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none leading-relaxed"></textarea>
             </div>
           </div>
 
           <!-- Actions -->
           <div class="mt-6 flex gap-3">
-            <button onclick="submitReport()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-3 px-4 rounded-xl shadow-sm transition flex justify-center items-center gap-2">
+            <button onclick="submitReport()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow-sm transition flex justify-center items-center gap-2">
               <span id="submit-spinner" class="hidden animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
-              📥 서버에 제출하기 (리로스쿨 수합용)
+              📥 서버에 제출하기 (보고서 수합함 등록)
             </button>
           </div>
         </div>
@@ -181,10 +182,10 @@
             제출 양식 미리보기
           </h3>
           <div class="flex gap-2">
-            <button onclick="copyRawText()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-3 rounded-lg transition">
+            <button onclick="copyRawText()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-3.5 rounded-lg transition">
               📋 텍스트 전체 복사
             </button>
-            <button onclick="window.print()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-3 rounded-lg transition shadow-sm">
+            <button onclick="window.print()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-3.5 rounded-lg transition shadow-sm">
               🖨️ 바로 인쇄 / PDF 저장
             </button>
           </div>
@@ -245,7 +246,7 @@
                   <span class="text-slate-500">■</span> 활동 내용 요약 및 가장 흥미로웠던 점
                 </div>
                 <div id="p-summary" class="p-4 text-justify text-[11.5px] whitespace-pre-wrap min-h-[140px] text-slate-800 leading-relaxed">
-                  <span class="text-slate-400 italic">왼쪽 작성 란에 핵심 요약과 자극 받았던 호기심 중심의 글을 채우면 본문에 실시간 반영됩니다.</span>
+                  <span class="text-slate-400 italic">내용이 비어 있습니다.</span>
                 </div>
               </div>
 
@@ -255,7 +256,7 @@
                   <span class="text-slate-500">■</span> 희망 진로, 관심 분야와의 연계성 및 향후 탐색 계획
                 </div>
                 <div id="p-connection" class="p-4 text-justify text-[11.5px] whitespace-pre-wrap min-h-[140px] text-slate-800 leading-relaxed">
-                  <span class="text-slate-400 italic">본인의 지적 호기심과 연결하고 향후 관련 독서나 교과 세특으로 어떻게 확장해 갈 것인지 실천 계획을 기술하세요.</span>
+                  <span class="text-slate-400 italic">내용이 비어 있습니다.</span>
                 </div>
               </div>
 
@@ -265,18 +266,18 @@
                   <span class="text-slate-500">■</span> 성찰 및 다짐
                 </div>
                 <div id="p-reflection" class="p-4 text-justify text-[11.5px] whitespace-pre-wrap min-h-[90px] text-slate-800 leading-relaxed">
-                  <span class="text-slate-400 italic">강연을 듣기 전과 비교하여 스스로 깨달은 학업 동기나 다짐을 서술하십시오.</span>
+                  <span class="text-slate-400 italic">내용이 비어 있습니다.</span>
                 </div>
               </div>
 
               <!-- Block 4 -->
               <div class="border border-slate-900">
-                <div class="bg-slate-50 px-3.5 py-2 border-b border-slate-900 font-bold text-[12.5px] text-slate-900 flex justify-between items-center">
+                <div class="bg-slate-50 px-3.5 py-2.5 border-b border-slate-900 font-bold text-[12.5px] text-slate-900 flex justify-between items-center">
                   <span class="flex items-center gap-2"><span class="text-slate-500">■</span> 특강 연계 진로 심화 탐구</span>
                   <span id="p-type-badge" class="text-[10px] border border-slate-950 px-2.5 py-0.5 font-bold bg-white text-slate-900">진로 일치형 [유형 ①]</span>
                 </div>
                 <div id="p-deepdive" class="p-4 text-justify text-[11.5px] whitespace-pre-wrap min-h-[180px] text-slate-800 leading-relaxed">
-                  <span class="text-slate-400 italic">심화 탐구는 본인의 진로 유형에 맞추어 독서, 학술 논문 등을 후속 탐구하여 기재합니다.</span>
+                  <span class="text-slate-400 italic">내용이 비어 있습니다.</span>
                 </div>
               </div>
 
@@ -412,105 +413,145 @@
     <p>© 2026 대전반석고등학교 교육과정 박람회 보고서 수합 관리 체계</p>
   </footer>
 
-  <!-- Firebase Integration -->
+  <!-- Firebase & Safe LocalStorage Setup -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
     import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
-    // Global variables & Firebase configuration setup
-    const firebaseConfig = JSON.parse(__firebase_config);
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'banseok-report-collector';
+    // Global variables (try-catch guard to prevent Github Pages crashes)
+    let db = null;
+    let auth = null;
+    let appId = 'banseok-report-collector';
+    let firebaseActive = false;
 
-    window.submissionsData = []; // Hold submissions cache globally for client search/export
-    let currentUser = null;
-
-    // RULE 3 - Prioritize auth and lock logic
-    const initAuth = async () => {
+    // Check if configuration exists
+    if (typeof __firebase_config !== 'undefined' && __firebase_config) {
       try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
-        }
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        appId = typeof __app_id !== 'undefined' ? __app_id : 'banseok-report-collector';
+        firebaseActive = true;
+        console.log("Firebase initialized successfully.");
       } catch (err) {
-        console.error("Authentication Failure: ", err);
+        console.error("Firebase Initialization Error:", err);
+      }
+    } else {
+      console.warn("Firebase configuration was not injected. Falling back to offline LocalStorage mode.");
+    }
+
+    window.isFirebaseActive = firebaseActive;
+
+    // Local Storage Mock Databases for GitHub Pages fallback
+    const LOCAL_STORAGE_KEY = "banseok_reports_fallback_db";
+    function getLocalSubmissions() {
+      const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    }
+    function saveLocalSubmissions(list) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
+      // Trigger a visual update
+      window.refreshSubmissions(list);
+    }
+
+    // Set fallback function for offline deployment
+    window.submitReportToDB = async function(docId, payload) {
+      if (firebaseActive && db) {
+        // Online Firebase saving
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', docId);
+        await setDoc(docRef, payload);
+      } else {
+        // Offline LocalStorage saving
+        const list = getLocalSubmissions();
+        const existingIdx = list.findIndex(x => x.id === docId);
+        const item = { id: docId, ...payload };
+        
+        if (existingIdx > -1) {
+          list[existingIdx] = item;
+        } else {
+          list.push(item);
+        }
+        saveLocalSubmissions(list);
       }
     };
 
-    initAuth();
-
-    onAuthStateChanged(auth, (user) => {
-      currentUser = user;
-      if (user) {
-        // Start listening to database once auth is completed
-        listenToSubmissions();
+    window.deleteSubmissionFromDB = async function(id) {
+      if (confirm(`진짜로 이 학생의 보고서 데이터를 영구 삭제하시겠습니까?`)) {
+        if (firebaseActive && db) {
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', id);
+          await deleteDoc(docRef);
+        } else {
+          const list = getLocalSubmissions().filter(x => x.id !== id);
+          saveLocalSubmissions(list);
+        }
+        window.showToast("데이터가 영구 삭제되었습니다.", "🗑️");
       }
-    });
+    };
 
-    // Realtime submissions synchronization
-    function listenToSubmissions() {
-      if (!currentUser) return;
+    // Firebase Auth login and live syncing listener
+    if (firebaseActive && auth) {
+      const initAuthAndSync = async () => {
+        try {
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+        } catch (err) {
+          console.error("Authentication Failure: ", err);
+        }
 
-      // RULE 1 - Strictly follow public path criteria
-      const submissionsRef = collection(db, 'artifacts', appId, 'public', 'data', 'submissions');
-      
-      // RULE 2 - Keep queries simple, filter in JS memory
-      onSnapshot(submissionsRef, (snapshot) => {
-        const list = [];
-        snapshot.forEach((doc) => {
-          list.push({ id: doc.id, ...doc.data() });
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            const submissionsRef = collection(db, 'artifacts', appId, 'public', 'data', 'submissions');
+            onSnapshot(submissionsRef, (snapshot) => {
+              const list = [];
+              snapshot.forEach((doc) => {
+                list.push({ id: doc.id, ...doc.data() });
+              });
+              
+              // Sort list in memory
+              list.sort((a, b) => {
+                if (a.grade !== b.grade) return Number(a.grade) - Number(b.grade);
+                if (a.clazz !== b.clazz) return Number(a.clazz) - Number(b.clazz);
+                return Number(a.number) - Number(b.number);
+              });
+
+              window.refreshSubmissions(list);
+            }, (error) => {
+              console.error("Firestore sync fail:", error);
+            });
+          }
         });
-        
-        // Sort submissions in client memory (Grade -> Class -> Num)
-        list.sort((a, b) => {
+      };
+      initAuthAndSync();
+    } else {
+      // Local Database initial loading on local/offline mode
+      setTimeout(() => {
+        const localList = getLocalSubmissions();
+        localList.sort((a, b) => {
           if (a.grade !== b.grade) return Number(a.grade) - Number(b.grade);
           if (a.clazz !== b.clazz) return Number(a.clazz) - Number(b.clazz);
           return Number(a.number) - Number(b.number);
         });
-
-        window.submissionsData = list;
-        renderDashboardList(list);
-        updateStatistics(list);
-      }, (error) => {
-        console.error("Firestore loading failure:", error);
-      });
+        window.refreshSubmissions(localList);
+      }, 300);
     }
-
-    // Submit Report document logic
-    window.submitReportToDB = async function(docId, payload) {
-      if (!currentUser) {
-        throw new Error("서버 연동을 위해 익명 인증 대기 중입니다. 잠시만 기다려 주세요.");
-      }
-      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', docId);
-      await setDoc(docRef, payload);
-    };
-
-    // Delete Submission
-    window.deleteSubmissionFromDB = async function(id) {
-      if (!currentUser) return;
-      if (confirm(`진짜로 ${id} 학생의 보고서 데이터를 영구 삭제하시겠습니까?`)) {
-        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', id);
-        await deleteDoc(docRef);
-        showToast("데이터가 영구 삭제되었습니다.", "🗑️");
-      }
-    };
   </script>
 
-  <!-- Interactive Logic -->
+  <!-- Control & Interface Logic Script (Complete & Un-truncated) -->
   <script>
     let activeType = 'type1';
     let activeTab = 'student';
     let isTeacherUnlocked = false;
 
-    // Type definition lookup
+    // Descriptions matching school criteria
     const typeDescriptions = {
-      type1: "<strong>진로 일치형:</strong> 특강 내용 중 더 깊이 알고 싶은 핵심 개념이나 기술을 선정하여 전공 서적, 논문, 기사 등을 활용해 심층 탐구한 내용을 기록합니다.",
-      type2: "<strong>진로 융합형:</strong> 자신의 전공과는 다르더라도 차선책이나 융합 관점에서 두 분야의 결합 시너지 및 융합적 매체 탐색 내용을 기술합니다.",
-      type3: "<strong>진로 탐색형:</strong> 구체적인 진로가 미정인 상태에서 발견한 키워드를 교양 서적이나 대중 다큐멘터리 등을 통해 쉽게 배우고 새롭게 느낀 점을 서술합니다."
+      type1: "<strong>① [진로 일치형]</strong> 이번 특강이 내 진로와 잘 맞는 경우: 특강 내용 중 더 깊이 알고 싶은 핵심 개념이나 기술을 선정하여, 관련 전공 도서나 학술 기사를 찾아 읽고 심화 탐구한 내용을 적어주세요.",
+      type2: "<strong>② [진로 융합형]</strong> 희망 학과가 아니었거나 차선책으로 들은 경우: 이번 특강 주제와 '본인의 진짜 관심 분야'를 연결할 수 있는 융합 주제를 고민해 보세요. 관련 매체를 찾아 두 분야가 어떻게 시너지를 낼 수 있는지 기술합니다.",
+      type3: "<strong>③ [진로 탐색형]</strong> 아직 뚜렷한 진로를 정하지 못한 경우: 특강 내용 중 단순히 호기심이 생겼던 흥미로운 키워드 하나를 포착하세요. 이를 쉽게 설명해 주는 대중 도서나 시사 기사, 교양 다큐멘터리를 찾아보고 새롭게 알게 된 점과 느낀 점을 기술하세요."
     };
 
     const typeTags = {
@@ -519,7 +560,14 @@
       type3: "진로 탐색형 [유형 ③]"
     };
 
-    // Toggle tab layout
+    // Global reference updater
+    window.refreshSubmissions = function(list) {
+      window.submissionsData = list;
+      renderDashboardList(list);
+      updateStatistics(list);
+    };
+
+    // Tab switcher
     function switchTab(tab) {
       activeTab = tab;
       const sTab = document.getElementById('tab-student');
@@ -538,7 +586,6 @@
         sBtn.className = "px-4 py-1.5 rounded-md text-xs font-semibold text-slate-300 hover:text-white transition";
         tBtn.className = "px-4 py-1.5 rounded-md text-xs font-semibold bg-emerald-600 text-white transition";
         
-        // Show dashboard or password screen
         if (isTeacherUnlocked) {
           document.getElementById('teacher-lock').classList.add('hidden');
           document.getElementById('teacher-dashboard').classList.remove('hidden');
@@ -552,13 +599,12 @@
     // Unlock Admin Module
     function unlockDashboard() {
       const pass = document.getElementById('teacher-pass').value;
-      // Simple teacher password gate
       if (pass === 'banseok' || pass === '1234') {
         isTeacherUnlocked = true;
         document.getElementById('teacher-lock').classList.add('hidden');
         document.getElementById('teacher-dashboard').classList.remove('hidden');
         document.getElementById('lock-error').classList.add('hidden');
-        showToast("교사용 수합 대시보드가 성공적으로 열렸습니다.", "🔓");
+        showToast("교사용 수합 대시보드가 활성화되었습니다.", "🔓");
       } else {
         document.getElementById('lock-error').classList.remove('hidden');
       }
@@ -606,7 +652,7 @@
       document.getElementById('p-summary').innerHTML = summary ? escapeHtml(summary) : '<span class="text-slate-400 italic">내용이 비어 있습니다.</span>';
       document.getElementById('p-connection').innerHTML = connection ? escapeHtml(connection) : '<span class="text-slate-400 italic">내용이 비어 있습니다.</span>';
       document.getElementById('p-reflection').innerHTML = reflection ? escapeHtml(reflection) : '<span class="text-slate-400 italic">내용이 비어 있습니다.</span>';
-      document.getElementById('p-deepdive').innerHTML = deepdive ? escapeHtml(deepdive) : '<span class="text-slate-400 italic">내용이 비어 있습니다. (진로 연계 선택탐구 작성 추천)</span>';
+      document.getElementById('p-deepdive').innerHTML = deepdive ? escapeHtml(deepdive) : '<span class="text-slate-400 italic">내용이 비어 있습니다. (선택탐구 작성 가능)</span>';
     }
 
     // Helper for encoding HTML
@@ -620,7 +666,7 @@
         .replace(/\n/g, "<br>");
     }
 
-    // Copy Raw Plain text representation
+    // Copy Raw Plain text representation (Robust copy implementation without truncation!)
     function copyRawText() {
       const grade = document.getElementById('grade').value || " ";
       const clazz = document.getElementById('class').value || " ";
@@ -656,14 +702,14 @@ ${deepdive}`;
       t.select();
       try {
         document.execCommand('copy');
-        showToast("텍스트 전체가 클립보드에 복사되었습니다! 제출 파일에 붙여 넣으세요.");
+        showToast("텍스트 전체가 클립보드에 복사되었습니다!");
       } catch (err) {
         showToast("복사 실패. 권한을 확인하세요.", "❌");
       }
       document.body.removeChild(t);
     }
 
-    // Submit payload to Firestore
+    // Submit payload to Firestore or LocalStorage
     async function submitReport() {
       const g = document.getElementById('grade').value.trim();
       const c = document.getElementById('class').value.trim();
@@ -677,14 +723,13 @@ ${deepdive}`;
       const deepdive = document.getElementById('deepdive').value.trim();
 
       if (!g || !c || !n || !name || !career || !subject || !summary || !connection || !reflection) {
-        showToast("필수(*) 항목을 모두 기입한 후 제출해 주시기 바랍니다.", "⚠️");
+        showToast("필수(*) 항목을 모두 기입한 후 제출해 주세요.", "⚠️");
         return;
       }
 
       const spinner = document.getElementById('submit-spinner');
       spinner.classList.remove('hidden');
 
-      // Unique Identifier per student inside class (e.g. 2_4_15) to allow clean self-updates
       const docId = `${g}_학년_${c}_반_${n}_번_${name}`;
 
       const payload = {
@@ -703,8 +748,16 @@ ${deepdive}`;
       };
 
       try {
-        await window.submitReportToDB(docId, payload);
-        showToast("🎉 보고서 수합함에 성공적으로 제출되었습니다!", "📥");
+        if (window.submitReportToDB) {
+          await window.submitReportToDB(docId, payload);
+          let successMsg = "🎉 보고서가 안전하게 제출되었습니다!";
+          if (!window.isFirebaseActive) {
+            successMsg += " (로컬 저장소 모드)";
+          }
+          showToast(successMsg, "📥");
+        } else {
+          throw new Error("데이터 전송 엔진이 활성화되지 않았습니다.");
+        }
       } catch (err) {
         showToast("제출 실패: " + err.message, "❌");
       } finally {
@@ -712,7 +765,7 @@ ${deepdive}`;
       }
     }
 
-    // UI Toast
+    // Toast alarm controller
     function showToast(message, icon = "✨") {
       const toast = document.getElementById('toast');
       document.getElementById('toast-icon').innerText = icon;
@@ -723,8 +776,9 @@ ${deepdive}`;
         toast.className = "fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2 no-print";
       }, 3000);
     }
+    window.showToast = showToast;
 
-    // Fill high quality Korean student sample to help user test
+    // Prefill demo data
     function fillSample() {
       document.getElementById('grade').value = 2;
       document.getElementById('class').value = 4;
@@ -740,18 +794,18 @@ ${deepdive}`;
       document.getElementById('deepdive').value = "[탐구 보고: 3세대 유전자 가위 정밀도 향상을 위한 PAM 유도체 메커니즘 분석]\nCRISPR 유전자 조작에서 핵심적인 역할을 하는 PAM(Protospacer Adjacent Motif) 염기서열의 상보적 매칭 구조를 심화 탐구하였다.\n인간 면역 유전자의 이중 나선 절단 과정에서 발생하는 염기누출 오류와 이에 따른 변성 메커니즘을 탐독하고, 타깃 표적 지향율을 98.7% 이상 유지하기 위해 단백질 공학에서 변성 Cas9(Cas9 Variants)을 활용해 오인 사격을 제어하는 정밀 나노 제어 원리를 도서와 특허를 연계 분석하여 한글 최종 성찰까지 정리했다.";
 
       onFormChange();
-      showToast("우수 샘플 정보가 일괄 입력되었습니다. 미리보기를 인쇄해 보세요!");
+      showToast("예시가 성공적으로 입력되었습니다!");
     }
 
-    // --- Teacher Dashboard Controller ---
+    // Teacher Dashboard rendering list
     function renderDashboardList(list) {
       const tbody = document.getElementById('submission-list');
-      if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center p-8 text-slate-400 font-medium">현재 등록된 학생 제출 문서가 전혀 존재하지 않습니다.</td></tr>`;
+      if (!tbody) return;
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center p-8 text-slate-400 font-medium">현재 제출된 보고서 데이터가 존재하지 않습니다.</td></tr>`;
         return;
       }
 
-      // Read filter terms
       const sName = document.getElementById('search-name').value.toLowerCase().trim();
       const fGrade = document.getElementById('filter-grade').value;
       const fClass = document.getElementById('filter-class').value;
@@ -764,7 +818,7 @@ ${deepdive}`;
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center p-8 text-slate-400 font-medium">검색 조건과 일치하는 보고서가 없습니다.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center p-8 text-slate-400 font-medium">검색 조건과 일치하는 데이터가 없습니다.</td></tr>`;
         return;
       }
 
@@ -781,8 +835,8 @@ ${deepdive}`;
             <td class="p-3 truncate max-w-[150px] text-slate-500" title="${item.subject}">${item.subject}</td>
             <td class="p-3 text-slate-400 text-[10px]">${dateStr}</td>
             <td class="p-3 text-right pr-6 space-x-1">
-              <button onclick="loadToPreview('${item.id}')" class="text-xs bg-slate-900 text-white hover:bg-slate-800 py-1.5 px-3 rounded-lg font-medium transition">인쇄/로드</button>
-              <button onclick="deleteSubmission('${item.id}')" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 py-1.5 px-3 rounded-lg font-medium transition">삭제</button>
+              <button onclick="loadToPreview('${item.id}')" class="text-[11px] bg-slate-900 text-white hover:bg-slate-800 py-1.5 px-3 rounded-lg font-medium transition">인쇄/로드</button>
+              <button onclick="deleteSubmission('${item.id}')" class="text-[11px] bg-red-50 hover:bg-red-100 text-red-600 py-1.5 px-3 rounded-lg font-medium transition">삭제</button>
             </td>
           </tr>
         `;
@@ -793,7 +847,7 @@ ${deepdive}`;
       renderDashboardList(window.submissionsData || []);
     }
 
-    // Load selected student's report into input form and live preview for teacher inspection / print
+    // Load data back to preview
     function loadToPreview(docId) {
       const item = (window.submissionsData || []).find(x => x.id === docId);
       if (!item) return;
@@ -812,26 +866,28 @@ ${deepdive}`;
       changeDeepdiveType(item.deepdiveType || 'type1');
       switchTab('student');
       
-      showToast(`[${item.name}] 학생의 자료를 양식지에 불러왔습니다. 수정 제출하거나 PDF 인쇄가 가능합니다.`, "📖");
+      showToast(`[${item.name}] 학생의 보고서 데이터를 불러왔습니다.`, "📖");
     }
 
-    // Handle delete action
     function deleteSubmission(id) {
       if (window.deleteSubmissionFromDB) {
         window.deleteSubmissionFromDB(id);
       }
     }
 
-    // Aggregate statistics
+    // Update charts & stats widgets
     function updateStatistics(list) {
-      document.getElementById('stat-total').innerText = list.length;
+      const totalSpan = document.getElementById('stat-total');
+      if (totalSpan) totalSpan.innerText = list.length;
       
+      const topSpan = document.getElementById('stat-top-class');
+      if (!topSpan) return;
+
       if (list.length === 0) {
-        document.getElementById('stat-top-class').innerText = "없음";
+        topSpan.innerText = "없음";
         return;
       }
 
-      // Count submissions per class
       const counts = {};
       list.forEach(item => {
         const key = `${item.grade}학년 ${item.clazz}반`;
@@ -846,28 +902,24 @@ ${deepdive}`;
           topClass = `${cls} (${cnt}명)`;
         }
       }
-
-      document.getElementById('stat-top-class').innerText = topClass;
+      topSpan.innerText = topClass;
     }
 
-    // Core Solution for User's Question:
-    // "이 파일을 한번에 수합하되 아이들 하나하나의 자료가 파일로 모아지게도 할 수 있을까?"
-    // Yes! JSZip lets us generate a downloadable archive containing individual files dynamically.
+    // One-click batch gather as a multi-file ZIP archive
     function downloadAllAsZip() {
       const list = window.submissionsData || [];
       if (list.length === 0) {
-        showToast("수합 완료된 문서 자료가 없어 ZIP 파일을 생성할 수 없습니다.", "⚠️");
+        showToast("다운로드할 데이터가 없습니다.", "⚠️");
         return;
       }
 
       const zip = new JSZip();
 
       list.forEach(item => {
-        // Individual file content
         const fileContent = `=======================================================
 [대전반석고등학교] 전공 진로 특강 및 진로 체험활동 보고서
 =======================================================
-* 인적 정보  : ${item.grade}학년 ${item.clazz}반 ${item.number}번 ${item.name}
+* 학적 정보  : ${item.grade}학년 ${item.clazz}반 ${item.number}번 ${item.name}
 * 희망 진로  : ${item.career}
 * 참여 전공  : ${item.subject}
 * 제출 일자  : ${item.submittedAt ? new Date(item.submittedAt).toLocaleString('ko-KR') : '-'}
@@ -887,39 +939,34 @@ ${item.deepdive || '작성되지 않음'}
 
 =======================================================`;
 
-        // Generate dynamic file name per student
-        const fileName = `[${item.grade}학년_${item.clazz}반_${item.number}번_${item.name}] 전공진로활동보고서.txt`;
+        const fileName = `[${item.grade}학년_${item.clazz}반_${item.number}번_${item.name}] 전공진로보고서.txt`;
         zip.file(fileName, fileContent);
       });
 
-      // Compress and Trigger download
       zip.generateAsync({ type: "blob" }).then(function (content) {
         const link = document.createElement("a");
         link.href = URL.createObjectURL(content);
-        link.download = `[반석고] 전공진로특강 보고서_일괄수합_총_${list.length}명.zip`;
+        link.download = `[반석고] 전공진로보고서_일괄수합_총_${list.length}명.zip`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        showToast("📁 학생 개별 파일(TXT)들이 들어있는 ZIP 압축파일이 생성 완료되었습니다!", "📦");
+        showToast("📁 학생 개별 텍스트 파일들이 압축되어 다운로드됩니다!", "📦");
       });
     }
 
-    // Combined Single Sheet CSV export for Excel
+    // Single-sheet spreadsheet CSV downloader for Excel
     function exportToCSV() {
       const list = window.submissionsData || [];
       if (list.length === 0) {
-        showToast("수합 완료된 문서 자료가 없습니다.", "⚠️");
+        showToast("다운로드할 데이터가 없습니다.", "⚠️");
         return;
       }
 
-      // Add Excel UTF-8 BOM to prevent Korean encoding breakdown
-      let csvContent = "\uFEFF";
+      let csvContent = "\uFEFF"; // UTF-8 BOM
       csvContent += "학년,반,번호,이름,희망진로,참여학과,요약내용,진로연계,성찰다짐,심화탐구유형,심화탐구내용,제출일시\n";
 
       list.forEach(item => {
-        // Clean text content to keep CSV syntax valid
         const clean = str => str ? `"${str.replace(/"/g, '""').replace(/\n/g, ' ')}"` : '""';
-        
         csvContent += [
           item.grade,
           item.clazz,
@@ -939,11 +986,11 @@ ${item.deepdive || '작성되지 않음'}
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `[반석고] 전공진로특강 보고서_통합대장_${list.length}명.csv`;
+      link.download = `[반석고] 전공진로보고서_통합대장_${list.length}명.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast("📈 엑셀 백업용 대장 CSV 파일 다운로드가 시작되었습니다.", "📊");
+      showToast("📈 스프레드시트 CSV 파일이 다운로드됩니다.", "📊");
     }
   </script>
 </body>
