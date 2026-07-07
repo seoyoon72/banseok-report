@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>반석고 전공진로 보고서 작성 및 수합 시스템</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts (Noto Sans KR) & Pretendard Webfont (초깔끔 현대적 서체) -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+  <!-- JSZip Library for Zipping files client-side -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  
+  <style>
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: -0.02em;
+    }
+    
+    /* 세련되고 정밀한 프리뷰 문서용 스타일 패치 */
+    .hwp-document {
+      font-family: 'Pretendard', -apple-system, sans-serif;
+      line-height: 1.625;
+      color: #1e293b;
+    }
+    
+    /* 얇고 정교한 한글 정형 격자선 */
+    .hwp-table {
+      border: 1.5px solid #0f172a;
+    }
+    .hwp-table th, .hwp-table td {
+      border: 1px solid #334155;
+    }
+    
+    /* 인쇄 최적화 설정 */
+    @media print {
+      body {
+        background-color: #ffffff;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-area {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-height: none !important;
+        overflow: visible !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Top Navigation & Tab Bar (no-print) -->
+  <header class="bg-slate-900 text-white shadow-sm no-print sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row justify-between items-center gap-3">
+      <div class="flex items-center gap-3">
+        <div class="bg-emerald-600 text-white p-1.5 rounded text-lg font-bold">🏫</div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight">대전반석고등학교</h1>
+          <p class="text-[11px] text-slate-400 font-light">전공 진로 특강 및 체험활동 보고서 수합 시스템</p>
+        </div>
+      </div>
+      
+      <!-- Tab Control buttons -->
+      <div class="flex bg-slate-800 p-1 rounded-lg border border-slate-700">
+        <button id="tab-student-btn" onclick="switchTab('student')" class="px-4 py-1.5 rounded-md text-xs font-semibold bg-emerald-600 text-white transition">
+          ✍️ 학생용 작성 및 제출
+        </button>
+        <button id="tab-teacher-btn" onclick="switchTab('teacher')" class="px-4 py-1.5 rounded-md text-xs font-semibold text-slate-300 hover:text-white transition">
+          📊 교사용 수합 대시보드
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6">
+    
+    <!-- 1. STUDENT TAB -->
+    <div id="tab-student" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Input Form (6 columns) -->
+      <div class="lg:col-span-6 flex flex-col gap-5 no-print">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex justify-between items-center border-b pb-3 mb-4">
+            <h2 class="text-base font-bold text-slate-950 flex items-center gap-2">
+              <span class="text-emerald-600">📝</span> 보고서 정보 입력
+            </h2>
+            <button onclick="fillSample()" class="text-xs text-slate-500 hover:text-emerald-600 border border-slate-200 px-2.5 py-1.5 rounded-lg hover:bg-slate-50 transition font-medium">
+              💡 작성 예시 채우기
+            </button>
+          </div>
+
+          <div class="grid grid-cols-4 gap-3 mb-4">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">학년 *</label>
+              <input type="number" id="grade" placeholder="학년" oninput="onFormChange()" class="w-full text-sm p-2 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none" min="1" max="3">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">반 *</label>
+              <input type="number" id="class" placeholder="반" oninput="onFormChange()" class="w-full text-sm p-2 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none" min="1" max="15">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">번호 *</label>
+              <input type="number" id="number" placeholder="번호" oninput="onFormChange()" class="w-full text-sm p-2 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none" min="1" max="40">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">이름 *</label>
+              <input type="text" id="name" placeholder="성명" oninput="onFormChange()" class="w-full text-sm p-2 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">희망 진로, 관심사 *</label>
+              <input type="text" id="career" placeholder="예: 생명과학 연구원 / 분자생물학" oninput="onFormChange()" class="w-full text-sm p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">참여 전공 및 강연, 체험 주제 *</label>
+              <input type="text" id="subject" placeholder="예: 공주대학교 화학과 - 신소재 과학기술" oninput="onFormChange()" class="w-full text-sm p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1 flex justify-between">
+                <span>1. 활동 내용 요약 및 가장 흥미로웠던 점 *</span>
+                <span class="text-[10px] text-slate-400 font-normal">구체적 학습 및 호기심 내용</span>
+              </label>
+              <textarea id="summary" rows="4" oninput="onFormChange()" placeholder="특강 내용 중 가장 기억에 남는 핵심 개념이나 전공 공부 등을 요약하고, 본인의 호기심을 가장 자극했던 부분을 구체적으로 기술하세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none leading-relaxed"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1 flex justify-between">
+                <span>2. 희망 진로, 관심 분야와의 연계성 및 향후 탐색 계획 *</span>
+                <span class="text-[10px] text-slate-400 font-normal">도서 연계, 후속 심화 탐구 계획 등</span>
+              </label>
+              <textarea id="connection" rows="4" oninput="onFormChange()" placeholder="이번 특강 내용이 본인의 희망 진로와 어떻게 연결되는지 쓰고, 이를 바탕으로 한 가상/실제 후속 탐구(독서 연계 등) 방향을 기록하세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none leading-relaxed"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">3. 성찰 및 다짐 *</label>
+              <textarea id="reflection" rows="3" oninput="onFormChange()" placeholder="활동을 마무리하며 변화된 진로 인식, 깨달음, 향후 학교생활에 대한 포부 및 진지한 다짐을 자유롭게 서술해 주십시오." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none leading-relaxed"></textarea>
+            </div>
+            
+            <div class="border-t pt-4">
+              <label class="block text-[11px] font-bold text-slate-700 mb-1">4. 특강 연계 진로 심화 탐구 (선택항목)</label>
+              <div class="flex gap-2 mb-2">
+                <button onclick="changeDeepdiveType('type1')" id="type-btn-1" class="flex-1 text-[11px] py-1.5 border border-emerald-600 bg-emerald-50 text-emerald-800 font-bold rounded-lg">① 진로 일치형</button>
+                <button onclick="changeDeepdiveType('type2')" id="type-btn-2" class="flex-1 text-[11px] py-1.5 border border-slate-200 bg-white text-slate-600 rounded-lg">② 진로 융합형</button>
+                <button onclick="changeDeepdiveType('type3')" id="type-btn-3" class="flex-1 text-[11px] py-1.5 border border-slate-200 bg-white text-slate-600 rounded-lg">③ 진로 탐색형</button>
+              </div>
+              <p id="type-help" class="text-[10px] text-slate-500 bg-slate-50 p-2 rounded-lg border mb-2 leading-relaxed">
+                <strong>진로 일치형:</strong> 특강 내용 중 더 깊이 알고 싶은 핵심 개념이나 기술을 선정하여 전공 서적, 논문, 기사 등을 활용해 심층 탐구한 내용을 기록합니다.
+              </p>
+              <textarea id="deepdive" rows="5" oninput="onFormChange()" placeholder="선택한 유형에 맞추어 도서, 학술 논문, 칼럼 등을 연계 조사하여 밝혀낸 심화 사실과 분석 내용을 적으세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none leading-relaxed"></textarea>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="mt-6 flex gap-3">
+            <button onclick="submitReport()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-3 px-4 rounded-xl shadow-sm transition flex justify-center items-center gap-2">
+              <span id="submit-spinner" class="hidden animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+              📥 서버에 제출하기 (리로스쿨 수합용)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Document Preview (6 columns) -->
+      <div class="lg:col-span-6 flex flex-col gap-4">
+        
+        <!-- Control buttons for preview -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between no-print">
+          <h3 class="font-bold text-slate-800 text-xs flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            제출 양식 미리보기
+          </h3>
+          <div class="flex gap-2">
+            <button onclick="copyRawText()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-3 rounded-lg transition">
+              📋 텍스트 전체 복사
+            </button>
+            <button onclick="window.print()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-3 rounded-lg transition shadow-sm">
+              🖨️ 바로 인쇄 / PDF 저장
+            </button>
+          </div>
+        </div>
+
+        <!-- HWP Document Grid Container -->
+        <div class="bg-white p-10 shadow-md border border-slate-200 rounded-2xl overflow-y-auto max-h-[85vh] lg:max-h-none print:max-h-none print-area flex flex-col gap-4">
+          
+          <div class="hwp-document">
+            
+            <!-- School Document Title -->
+            <div class="text-center mb-6">
+              <h1 class="text-2xl font-black tracking-widest border-b-4 border-double border-slate-900 pb-2 inline-block px-10 text-slate-900">전공 진로 특강 및 진로 체험활동 보고서</h1>
+            </div>
+
+            <p class="text-[10.5px] text-justify leading-relaxed text-slate-700 mb-4 tracking-tight">
+              ※ 교육과정 박람회 기간 실시된 전공 진로 특강 및 진로 체험활동은 유명 작가, 대학 교수님 및 전공 선배들과의 만남을 통해 얻은 학문적 자극을 바탕으로, 자신의 진로 및 관심사를 자기주도적으로 확장하는 활동입니다. 특강을 듣는 것에 그치지 않고 본인의 관심사를 심화 탐구하여 충실히 작성하기 바랍니다.
+            </p>
+
+            <!-- HWP Standard Identification Table -->
+            <table class="hwp-table w-full text-[11px] text-center border-collapse border-slate-900 mb-4">
+              <tbody>
+                <tr class="h-10">
+                  <td class="bg-slate-50 font-bold w-[14%] text-center text-slate-900">학교명</td>
+                  <td class="w-[26%] text-center font-bold text-slate-800">대전반석고등학교</td>
+                  <td class="bg-slate-50 font-bold w-[16%] text-center text-slate-900">학년 / 반 / 번</td>
+                  <td class="w-[44%] text-center text-slate-800">
+                    <span id="p-grade" class="underline font-bold px-2 text-indigo-600">　</span>학년 &nbsp;
+                    <span id="p-class" class="underline font-bold px-2 text-indigo-600">　</span>반 &nbsp;
+                    <span id="p-num" class="underline font-bold px-2 text-indigo-600">　</span>번
+                  </td>
+                </tr>
+                <tr class="h-10">
+                  <td class="bg-slate-50 font-bold text-center text-slate-900">성 명</td>
+                  <td class="text-center font-bold text-slate-800">
+                    <span id="p-name" class="underline px-4 text-slate-900">　　　</span>
+                  </td>
+                  <td class="bg-slate-50 font-bold text-center text-slate-900">희망 진로<br>관심사</td>
+                  <td class="text-left px-3 py-1.5 font-semibold text-slate-800 leading-snug">
+                    <span id="p-career" class="text-slate-400 font-normal">지정되지 않음</span>
+                  </td>
+                </tr>
+                <tr class="h-11">
+                  <td class="bg-slate-50 font-bold text-center text-slate-900 leading-tight">참여 전공 및<br>강연 주제</td>
+                  <td colspan="3" class="text-left px-3 py-1.5 font-semibold text-slate-800 leading-snug">
+                    <span id="p-subject" class="text-slate-400 font-normal">지정되지 않음</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Content Blocks -->
+            <div class="space-y-4">
+              
+              <!-- Block 1 -->
+              <div class="border border-slate-900">
+                <div class="bg-slate-50 px-3.5 py-2.5 border-b border-slate-900 font-bold text-[12.5px] text-slate-900 flex items-center gap-2">
+                  <span class="text-slate-500">■</span> 활동 내용 요약 및 가장 흥미로웠던 점
+                </div>
+                <div id="p-summary" class="p-4 text-justify text-[11.5px] whitespace-pre-wrap min-h-[140px] text-slate-800 leading-relaxed">
+                  <span class="text-slate-400 italic">왼쪽 작성 란에 핵심 요약과 자극 받았던 호기심 중심의 글을 채우면 본문에 실시간 반영됩니다.</span>
+                </div>
+              </div>
+
+              <!-- Block 2 -->
+              <div class="border border-slate-900">
+                <div class="bg-slate-50 px-3.5 py-2.5 border-b border-slate-900 font-bold text-[12.5px] text-slate-900 flex items-center gap-2">
+                  <span class="text-slate-500">■</span> 희망 진로, 관심 분야와의 연계성 및 향후 탐색 계획
+                </div>
+                <div id="p-connection" class="p-4 text-justify text-[11.5px] whitespace-pre-wrap min-h-[140px] text-slate-800 leading-relaxed">
+                  <span class="text-slate-400 italic">본인의 지적 호기심과 연결하고 향후 관련 독서나 교과 세특으로 어떻게 확장해 갈 것인지 실천 계획을 기술하세요.</span>
+                </div>
+              </div>
+
+              <!-- Block 3 -->
+              <div class="border border-slate-900">
+                <div class="bg-slate-50 px-3.5 py-2.5 border-b border-slate-900 font-bold text-[12.5px] text-slate-900 flex items-center gap-2">
+                  <span class="text-slate-500">■</span> 성찰 및 다짐
+                </div>
+                <div id="p-reflection" class="p-4 text-justify text-[11.5px] whitespace-pre-wrap min-h-[90px] text-slate-800 leading-relaxed">
+                  <span class="text-slate-400 italic">강연을 듣기 전과 비교하여 스스로 깨달은 학업 동기나 다짐을 서술하십시오.</span>
+                </div>
+              </div>
+
+              <!-- Block 4 -->
+              <div class="border border-slate-900">
+                <div class="bg-slate-50 px-3.5 py-2 border-b border-slate-900 font-bold text-[12.5px] text-slate-900 flex justify-between items-center">
+                  <span class="flex items-center gap-2"><span class="text-slate-500">■</span> 특강 연계 진로 심화 탐구</span>
+                  <span id="p-type-badge" class="text-[10px] border border-slate-950 px-2.5 py-0.5 font-bold bg-white text-slate-900">진로 일치형 [유형 ①]</span>
+                </div>
+                <div id="p-deepdive" class="p-4 text-justify text-[11.5px] whitespace-pre-wrap min-h-[180px] text-slate-800 leading-relaxed">
+                  <span class="text-slate-400 italic">심화 탐구는 본인의 진로 유형에 맞추어 독서, 학술 논문 등을 후속 탐구하여 기재합니다.</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Footer print info -->
+            <div class="text-center text-[10px] text-slate-400 mt-6 font-sans">
+              대전반석고등학교 교육과정 박람회 진로 활동 보고서
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 2. TEACHER TAB (DASHBOARD) -->
+    <div id="tab-teacher" class="hidden no-print">
+      
+      <!-- Lock Screen / Password Modal -->
+      <div id="teacher-lock" class="max-w-md mx-auto my-12 bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+        <div class="text-center mb-6">
+          <span class="text-4xl">🔐</span>
+          <h2 class="text-lg font-bold text-slate-800 mt-2">교사 인증 관리자 모드</h2>
+          <p class="text-xs text-slate-500 mt-1">학생들이 제출한 모든 파일을 일괄 확인 및 개별 수합하기 위해 보안 비밀번호를 입력해 주십시오.</p>
+        </div>
+        <div class="mb-4">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">인증 패스코드</label>
+          <input type="password" id="teacher-pass" placeholder="기본 비밀번호: banseok" class="w-full text-sm p-3 border border-slate-300 rounded focus:border-emerald-500 focus:outline-none">
+        </div>
+        <button onclick="unlockDashboard()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition">
+          인증 및 대시보드 열기
+        </button>
+        <p id="lock-error" class="hidden text-xs text-red-600 font-semibold mt-2 text-center">비밀번호가 일치하지 않습니다.</p>
+      </div>
+
+      <!-- Real Dashboard Container -->
+      <div id="teacher-dashboard" class="hidden flex flex-col gap-6">
+        
+        <!-- Statistics Widget Card -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="border-r border-slate-100 pr-4">
+            <h4 class="text-xs font-bold text-slate-400 uppercase">전체 제출 인원</h4>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span id="stat-total" class="text-3xl font-extrabold text-emerald-600">0</span>
+              <span class="text-xs text-slate-500">명 제출 완료</span>
+            </div>
+          </div>
+          <div class="border-r border-slate-100 pr-4">
+            <h4 class="text-xs font-bold text-slate-400 uppercase">가장 많이 낸 반</h4>
+            <p id="stat-top-class" class="text-lg font-bold text-slate-800 mt-2">집계 중...</p>
+          </div>
+          <div class="col-span-2 flex flex-col justify-center">
+            <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">교사용 대량 데이터 다운로드 도구</h4>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="downloadAllAsZip()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-3.5 rounded-xl flex items-center gap-1.5 transition">
+                🗂️ 개별 파일 통째로 받기 (ZIP)
+              </button>
+              <button onclick="exportToCSV()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-3.5 rounded-xl flex items-center gap-1.5 transition">
+                📈 엑셀(CSV) 단일시트로 통합 받기
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter and Search Grid -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center gap-3 justify-between">
+          <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <input type="text" id="search-name" oninput="filterSubmissions()" placeholder="🔍 이름 검색" class="text-xs p-2.5 border border-slate-300 rounded-lg w-full sm:w-44 focus:outline-none">
+            <select id="filter-grade" onchange="filterSubmissions()" class="text-xs p-2.5 border border-slate-300 rounded-lg w-1/3 sm:w-auto focus:outline-none">
+              <option value="">전체 학년</option>
+              <option value="1">1학년</option>
+              <option value="2">2학년</option>
+              <option value="3">3학년</option>
+            </select>
+            <select id="filter-class" onchange="filterSubmissions()" class="text-xs p-2.5 border border-slate-300 rounded-lg w-1/3 sm:w-auto focus:outline-none">
+              <option value="">전체 반</option>
+              <option value="1">1반</option>
+              <option value="2">2반</option>
+              <option value="3">3반</option>
+              <option value="4">4반</option>
+              <option value="5">5반</option>
+              <option value="6">6반</option>
+              <option value="7">7반</option>
+              <option value="8">8반</option>
+              <option value="9">9반</option>
+              <option value="10">10반</option>
+            </select>
+          </div>
+          <div class="text-xs text-slate-400 font-semibold w-full sm:w-auto text-right">
+            ※ 각 학생 행의 '인쇄/로드'를 누르면 우측 한글 프리뷰 양식에 탑재됩니다.
+          </div>
+        </div>
+
+        <!-- Submission List Table -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase">
+                  <th class="p-3.5 pl-6">학적번호</th>
+                  <th class="p-3.5">성명</th>
+                  <th class="p-3.5">희망 진로</th>
+                  <th class="p-3.5">참여 전공</th>
+                  <th class="p-3.5">제출 일시</th>
+                  <th class="p-3.5 text-right pr-6">관리</th>
+                </tr>
+              </thead>
+              <tbody id="submission-list" class="divide-y divide-slate-100 text-xs text-slate-700">
+                <!-- Dynamic generation -->
+                <tr>
+                  <td colspan="6" class="text-center p-8 text-slate-400 font-medium">데이터 로딩 중이거나 아직 제출된 보고서가 없습니다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Toast Notification System (no-print) -->
+  <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2 no-print">
+    <span id="toast-icon">✨</span>
+    <span id="toast-msg">작업 성공</span>
+  </div>
+
+  <footer class="bg-slate-100 border-t py-4 text-center text-[11px] text-slate-400 no-print mt-auto">
+    <p>© 2026 대전반석고등학교 교육과정 박람회 보고서 수합 관리 체계</p>
+  </footer>
+
+  <!-- Firebase Integration -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+    import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+    // Global variables & Firebase configuration setup
+    const firebaseConfig = JSON.parse(__firebase_config);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'banseok-report-collector';
+
+    window.submissionsData = []; // Hold submissions cache globally for client search/export
+    let currentUser = null;
+
+    // RULE 3 - Prioritize auth and lock logic
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.error("Authentication Failure: ", err);
+      }
+    };
+
+    initAuth();
+
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      if (user) {
+        // Start listening to database once auth is completed
+        listenToSubmissions();
+      }
+    });
+
+    // Realtime submissions synchronization
+    function listenToSubmissions() {
+      if (!currentUser) return;
+
+      // RULE 1 - Strictly follow public path criteria
+      const submissionsRef = collection(db, 'artifacts', appId, 'public', 'data', 'submissions');
+      
+      // RULE 2 - Keep queries simple, filter in JS memory
+      onSnapshot(submissionsRef, (snapshot) => {
+        const list = [];
+        snapshot.forEach((doc) => {
+          list.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Sort submissions in client memory (Grade -> Class -> Num)
+        list.sort((a, b) => {
+          if (a.grade !== b.grade) return Number(a.grade) - Number(b.grade);
+          if (a.clazz !== b.clazz) return Number(a.clazz) - Number(b.clazz);
+          return Number(a.number) - Number(b.number);
+        });
+
+        window.submissionsData = list;
+        renderDashboardList(list);
+        updateStatistics(list);
+      }, (error) => {
+        console.error("Firestore loading failure:", error);
+      });
+    }
+
+    // Submit Report document logic
+    window.submitReportToDB = async function(docId, payload) {
+      if (!currentUser) {
+        throw new Error("서버 연동을 위해 익명 인증 대기 중입니다. 잠시만 기다려 주세요.");
+      }
+      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', docId);
+      await setDoc(docRef, payload);
+    };
+
+    // Delete Submission
+    window.deleteSubmissionFromDB = async function(id) {
+      if (!currentUser) return;
+      if (confirm(`진짜로 ${id} 학생의 보고서 데이터를 영구 삭제하시겠습니까?`)) {
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', id);
+        await deleteDoc(docRef);
+        showToast("데이터가 영구 삭제되었습니다.", "🗑️");
+      }
+    };
+  </script>
+
+  <!-- Interactive Logic -->
+  <script>
+    let activeType = 'type1';
+    let activeTab = 'student';
+    let isTeacherUnlocked = false;
+
+    // Type definition lookup
+    const typeDescriptions = {
+      type1: "<strong>진로 일치형:</strong> 특강 내용 중 더 깊이 알고 싶은 핵심 개념이나 기술을 선정하여 전공 서적, 논문, 기사 등을 활용해 심층 탐구한 내용을 기록합니다.",
+      type2: "<strong>진로 융합형:</strong> 자신의 전공과는 다르더라도 차선책이나 융합 관점에서 두 분야의 결합 시너지 및 융합적 매체 탐색 내용을 기술합니다.",
+      type3: "<strong>진로 탐색형:</strong> 구체적인 진로가 미정인 상태에서 발견한 키워드를 교양 서적이나 대중 다큐멘터리 등을 통해 쉽게 배우고 새롭게 느낀 점을 서술합니다."
+    };
+
+    const typeTags = {
+      type1: "진로 일치형 [유형 ①]",
+      type2: "진로 융합형 [유형 ②]",
+      type3: "진로 탐색형 [유형 ③]"
+    };
+
+    // Toggle tab layout
+    function switchTab(tab) {
+      activeTab = tab;
+      const sTab = document.getElementById('tab-student');
+      const tTab = document.getElementById('tab-teacher');
+      const sBtn = document.getElementById('tab-student-btn');
+      const tBtn = document.getElementById('tab-teacher-btn');
+
+      if (tab === 'student') {
+        sTab.classList.remove('hidden');
+        tTab.classList.add('hidden');
+        sBtn.className = "px-4 py-1.5 rounded-md text-xs font-semibold bg-emerald-600 text-white transition";
+        tBtn.className = "px-4 py-1.5 rounded-md text-xs font-semibold text-slate-300 hover:text-white transition";
+      } else {
+        sTab.classList.add('hidden');
+        tTab.classList.remove('hidden');
+        sBtn.className = "px-4 py-1.5 rounded-md text-xs font-semibold text-slate-300 hover:text-white transition";
+        tBtn.className = "px-4 py-1.5 rounded-md text-xs font-semibold bg-emerald-600 text-white transition";
+        
+        // Show dashboard or password screen
+        if (isTeacherUnlocked) {
+          document.getElementById('teacher-lock').classList.add('hidden');
+          document.getElementById('teacher-dashboard').classList.remove('hidden');
+        } else {
+          document.getElementById('teacher-lock').classList.remove('hidden');
+          document.getElementById('teacher-dashboard').classList.add('hidden');
+        }
+      }
+    }
+
+    // Unlock Admin Module
+    function unlockDashboard() {
+      const pass = document.getElementById('teacher-pass').value;
+      // Simple teacher password gate
+      if (pass === 'banseok' || pass === '1234') {
+        isTeacherUnlocked = true;
+        document.getElementById('teacher-lock').classList.add('hidden');
+        document.getElementById('teacher-dashboard').classList.remove('hidden');
+        document.getElementById('lock-error').classList.add('hidden');
+        showToast("교사용 수합 대시보드가 성공적으로 열렸습니다.", "🔓");
+      } else {
+        document.getElementById('lock-error').classList.remove('hidden');
+      }
+    }
+
+    // Change deepdive option selection
+    function changeDeepdiveType(type) {
+      activeType = type;
+      ['type1', 'type2', 'type3'].forEach((t, i) => {
+        const btn = document.getElementById(`type-btn-${i+1}`);
+        if (t === type) {
+          btn.className = "flex-1 text-[11px] py-1.5 border border-emerald-600 bg-emerald-50 text-emerald-800 font-bold rounded-lg";
+        } else {
+          btn.className = "flex-1 text-[11px] py-1.5 border border-slate-200 bg-white text-slate-600 rounded-lg";
+        }
+      });
+
+      document.getElementById('type-help').innerHTML = typeDescriptions[type];
+      document.getElementById('p-type-badge').innerText = typeTags[type];
+      onFormChange();
+    }
+
+    // Live sync fields to HWP-style preview
+    function onFormChange() {
+      const g = document.getElementById('grade').value || "　";
+      const c = document.getElementById('class').value || "　";
+      const n = document.getElementById('number').value || "　";
+      const name = document.getElementById('name').value || "　　　";
+
+      document.getElementById('p-grade').innerText = g;
+      document.getElementById('p-class').innerText = c;
+      document.getElementById('p-num').innerText = n;
+      document.getElementById('p-name').innerText = name;
+
+      const career = document.getElementById('career').value;
+      const subject = document.getElementById('subject').value;
+      const summary = document.getElementById('summary').value;
+      const connection = document.getElementById('connection').value;
+      const reflection = document.getElementById('reflection').value;
+      const deepdive = document.getElementById('deepdive').value;
+
+      document.getElementById('p-career').innerHTML = career ? escapeHtml(career) : '<span class="text-slate-400 italic">지정되지 않음</span>';
+      document.getElementById('p-subject').innerHTML = subject ? escapeHtml(subject) : '<span class="text-slate-400 italic">지정되지 않음</span>';
+
+      document.getElementById('p-summary').innerHTML = summary ? escapeHtml(summary) : '<span class="text-slate-400 italic">내용이 비어 있습니다.</span>';
+      document.getElementById('p-connection').innerHTML = connection ? escapeHtml(connection) : '<span class="text-slate-400 italic">내용이 비어 있습니다.</span>';
+      document.getElementById('p-reflection').innerHTML = reflection ? escapeHtml(reflection) : '<span class="text-slate-400 italic">내용이 비어 있습니다.</span>';
+      document.getElementById('p-deepdive').innerHTML = deepdive ? escapeHtml(deepdive) : '<span class="text-slate-400 italic">내용이 비어 있습니다. (진로 연계 선택탐구 작성 추천)</span>';
+    }
+
+    // Helper for encoding HTML
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;")
+        .replace(/\n/g, "<br>");
+    }
+
+    // Copy Raw Plain text representation
+    function copyRawText() {
+      const grade = document.getElementById('grade').value || " ";
+      const clazz = document.getElementById('class').value || " ";
+      const number = document.getElementById('number').value || " ";
+      const name = document.getElementById('name').value || " ";
+      const career = document.getElementById('career').value || " ";
+      const subject = document.getElementById('subject').value || " ";
+      const summary = document.getElementById('summary').value || " ";
+      const connection = document.getElementById('connection').value || " ";
+      const reflection = document.getElementById('reflection').value || " ";
+      const deepdive = document.getElementById('deepdive').value || " ";
+
+      const formatted = `[대전반석고등학교 전공 진로 보고서]
+인적사항: ${grade}학년 ${clazz}반 ${number}번 성명: ${name}
+희망진로: ${career}
+전공 및 주제: ${subject}
+
+1. 활동 내용 요약 및 가장 흥미로웠던 점:
+${summary}
+
+2. 희망 진로, 관심 분야와의 연계성 및 향후 탐색 계획:
+${connection}
+
+3. 성찰 및 다짐:
+${reflection}
+
+4. 특강 연계 진로 심화 탐구 (${typeTags[activeType]}):
+${deepdive}`;
+
+      const t = document.createElement('textarea');
+      t.value = formatted;
+      document.body.appendChild(t);
+      t.select();
+      try {
+        document.execCommand('copy');
+        showToast("텍스트 전체가 클립보드에 복사되었습니다! 제출 파일에 붙여 넣으세요.");
+      } catch (err) {
+        showToast("복사 실패. 권한을 확인하세요.", "❌");
+      }
+      document.body.removeChild(t);
+    }
+
+    // Submit payload to Firestore
+    async function submitReport() {
+      const g = document.getElementById('grade').value.trim();
+      const c = document.getElementById('class').value.trim();
+      const n = document.getElementById('number').value.trim();
+      const name = document.getElementById('name').value.trim();
+      const career = document.getElementById('career').value.trim();
+      const subject = document.getElementById('subject').value.trim();
+      const summary = document.getElementById('summary').value.trim();
+      const connection = document.getElementById('connection').value.trim();
+      const reflection = document.getElementById('reflection').value.trim();
+      const deepdive = document.getElementById('deepdive').value.trim();
+
+      if (!g || !c || !n || !name || !career || !subject || !summary || !connection || !reflection) {
+        showToast("필수(*) 항목을 모두 기입한 후 제출해 주시기 바랍니다.", "⚠️");
+        return;
+      }
+
+      const spinner = document.getElementById('submit-spinner');
+      spinner.classList.remove('hidden');
+
+      // Unique Identifier per student inside class (e.g. 2_4_15) to allow clean self-updates
+      const docId = `${g}_학년_${c}_반_${n}_번_${name}`;
+
+      const payload = {
+        grade: Number(g),
+        clazz: Number(c),
+        number: Number(n),
+        name: name,
+        career: career,
+        subject: subject,
+        summary: summary,
+        connection: connection,
+        reflection: reflection,
+        deepdive: deepdive,
+        deepdiveType: activeType,
+        submittedAt: new Date().toISOString()
+      };
+
+      try {
+        await window.submitReportToDB(docId, payload);
+        showToast("🎉 보고서 수합함에 성공적으로 제출되었습니다!", "📥");
+      } catch (err) {
+        showToast("제출 실패: " + err.message, "❌");
+      } finally {
+        spinner.classList.add('hidden');
+      }
+    }
+
+    // UI Toast
+    function showToast(message, icon = "✨") {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-icon').innerText = icon;
+      document.getElementById('toast-msg').innerText = message;
+      toast.className = "fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-lg transform translate-y-0 opacity-100 transition-all duration-300 z-50 flex items-center gap-2 no-print";
+      
+      setTimeout(() => {
+        toast.className = "fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2 no-print";
+      }, 3000);
+    }
+
+    // Fill high quality Korean student sample to help user test
+    function fillSample() {
+      document.getElementById('grade').value = 2;
+      document.getElementById('class').value = 4;
+      document.getElementById('number').value = 15;
+      document.getElementById('name').value = "이반석";
+      document.getElementById('career').value = "융합 생명과학 및 제약 개발 원천기술 연구원";
+      document.getElementById('subject').value = "공주대학교 생명과학과 - 차세대 유전자 가위 기술과 의학적 적용 트렌드";
+      document.getElementById('summary').value = "생명공학과 특강을 통해 CRISPR-Cas9 유전자 가위의 타깃 지향적 DNA 절단 메커니즘과 그 유전체 교정 기법을 상세히 이수할 수 있었다.\n특강 중 멘토단 선배가 설명해 준 인간 난치성 질병 치료 목적의 오프타깃(Off-target) 오작동 배제 최적화 모델에 큰 흥미를 갖게 되었다. 미생물학 기초에 대한 탄탄한 이론이 선행되어야만 실제 대학 실험실의 배양 실무 단계로 이어질 수 있음을 직시했다.";
+      document.getElementById('connection').value = "그동안 단순히 암 극복 약물 설계에만 치우쳤던 생물학적 관심이 유전자 발현 제어라는 근본적 분야로 확장되는 계기가 되었다.\n유도만능줄기세포(iPSC) 연구 및 맞춤형 메신저 리보핵산(mRNA) 백신 기술과의 교집합을 발견했으며, 학교 후속 자율 활동으로 추천 도서인 <유전자 가위 혁명>을 탐독하여 생명 윤리와 결합된 소논문 형식의 연계 심화 보고서를 기획하고자 한다.";
+      document.getElementById('reflection').value = "전공 특강 청취 전에는 복잡한 생화학 분자 공식들이 나와 괴리된 이론처럼 여겨졌으나, 이것이 실제 인류 구원의 기술로 완성되는 프로세스를 보며 학구열이 급상승했다.\n고등학교 화학과 생명과학 수업에 더 열정적으로 참여하여 기반 원리를 남김없이 흡수하겠다고 다짐했다.";
+      
+      changeDeepdiveType('type1');
+      document.getElementById('deepdive').value = "[탐구 보고: 3세대 유전자 가위 정밀도 향상을 위한 PAM 유도체 메커니즘 분석]\nCRISPR 유전자 조작에서 핵심적인 역할을 하는 PAM(Protospacer Adjacent Motif) 염기서열의 상보적 매칭 구조를 심화 탐구하였다.\n인간 면역 유전자의 이중 나선 절단 과정에서 발생하는 염기누출 오류와 이에 따른 변성 메커니즘을 탐독하고, 타깃 표적 지향율을 98.7% 이상 유지하기 위해 단백질 공학에서 변성 Cas9(Cas9 Variants)을 활용해 오인 사격을 제어하는 정밀 나노 제어 원리를 도서와 특허를 연계 분석하여 한글 최종 성찰까지 정리했다.";
+
+      onFormChange();
+      showToast("우수 샘플 정보가 일괄 입력되었습니다. 미리보기를 인쇄해 보세요!");
+    }
+
+    // --- Teacher Dashboard Controller ---
+    function renderDashboardList(list) {
+      const tbody = document.getElementById('submission-list');
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center p-8 text-slate-400 font-medium">현재 등록된 학생 제출 문서가 전혀 존재하지 않습니다.</td></tr>`;
+        return;
+      }
+
+      // Read filter terms
+      const sName = document.getElementById('search-name').value.toLowerCase().trim();
+      const fGrade = document.getElementById('filter-grade').value;
+      const fClass = document.getElementById('filter-class').value;
+
+      let filtered = list.filter(item => {
+        if (sName && !item.name.toLowerCase().includes(sName)) return false;
+        if (fGrade && String(item.grade) !== fGrade) return false;
+        if (fClass && String(item.clazz) !== fClass) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center p-8 text-slate-400 font-medium">검색 조건과 일치하는 보고서가 없습니다.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(item => {
+        const dateStr = item.submittedAt ? new Date(item.submittedAt).toLocaleDateString('ko-KR', {
+          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        }) : '-';
+
+        return `
+          <tr class="hover:bg-slate-50 border-b border-slate-100 transition">
+            <td class="p-3 pl-6 font-semibold text-slate-900">${item.grade}학년 ${item.clazz}반 ${item.number}번</td>
+            <td class="p-3 font-bold text-emerald-700">${item.name}</td>
+            <td class="p-3 truncate max-w-[150px] text-slate-500" title="${item.career}">${item.career}</td>
+            <td class="p-3 truncate max-w-[150px] text-slate-500" title="${item.subject}">${item.subject}</td>
+            <td class="p-3 text-slate-400 text-[10px]">${dateStr}</td>
+            <td class="p-3 text-right pr-6 space-x-1">
+              <button onclick="loadToPreview('${item.id}')" class="text-xs bg-slate-900 text-white hover:bg-slate-800 py-1.5 px-3 rounded-lg font-medium transition">인쇄/로드</button>
+              <button onclick="deleteSubmission('${item.id}')" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 py-1.5 px-3 rounded-lg font-medium transition">삭제</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterSubmissions() {
+      renderDashboardList(window.submissionsData || []);
+    }
+
+    // Load selected student's report into input form and live preview for teacher inspection / print
+    function loadToPreview(docId) {
+      const item = (window.submissionsData || []).find(x => x.id === docId);
+      if (!item) return;
+
+      document.getElementById('grade').value = item.grade;
+      document.getElementById('class').value = item.clazz;
+      document.getElementById('number').value = item.number;
+      document.getElementById('name').value = item.name;
+      document.getElementById('career').value = item.career;
+      document.getElementById('subject').value = item.subject;
+      document.getElementById('summary').value = item.summary;
+      document.getElementById('connection').value = item.connection;
+      document.getElementById('reflection').value = item.reflection;
+      document.getElementById('deepdive').value = item.deepdive || "";
+
+      changeDeepdiveType(item.deepdiveType || 'type1');
+      switchTab('student');
+      
+      showToast(`[${item.name}] 학생의 자료를 양식지에 불러왔습니다. 수정 제출하거나 PDF 인쇄가 가능합니다.`, "📖");
+    }
+
+    // Handle delete action
+    function deleteSubmission(id) {
+      if (window.deleteSubmissionFromDB) {
+        window.deleteSubmissionFromDB(id);
+      }
+    }
+
+    // Aggregate statistics
+    function updateStatistics(list) {
+      document.getElementById('stat-total').innerText = list.length;
+      
+      if (list.length === 0) {
+        document.getElementById('stat-top-class').innerText = "없음";
+        return;
+      }
+
+      // Count submissions per class
+      const counts = {};
+      list.forEach(item => {
+        const key = `${item.grade}학년 ${item.clazz}반`;
+        counts[key] = (counts[key] || 0) + 1;
+      });
+
+      let topClass = "";
+      let max = -1;
+      for (const [cls, cnt] of Object.entries(counts)) {
+        if (cnt > max) {
+          max = cnt;
+          topClass = `${cls} (${cnt}명)`;
+        }
+      }
+
+      document.getElementById('stat-top-class').innerText = topClass;
+    }
+
+    // Core Solution for User's Question:
+    // "이 파일을 한번에 수합하되 아이들 하나하나의 자료가 파일로 모아지게도 할 수 있을까?"
+    // Yes! JSZip lets us generate a downloadable archive containing individual files dynamically.
+    function downloadAllAsZip() {
+      const list = window.submissionsData || [];
+      if (list.length === 0) {
+        showToast("수합 완료된 문서 자료가 없어 ZIP 파일을 생성할 수 없습니다.", "⚠️");
+        return;
+      }
+
+      const zip = new JSZip();
+
+      list.forEach(item => {
+        // Individual file content
+        const fileContent = `=======================================================
+[대전반석고등학교] 전공 진로 특강 및 진로 체험활동 보고서
+=======================================================
+* 인적 정보  : ${item.grade}학년 ${item.clazz}반 ${item.number}번 ${item.name}
+* 희망 진로  : ${item.career}
+* 참여 전공  : ${item.subject}
+* 제출 일자  : ${item.submittedAt ? new Date(item.submittedAt).toLocaleString('ko-KR') : '-'}
+-------------------------------------------------------
+
+1. 활동 내용 요약 및 가장 흥미로웠던 점 :
+${item.summary}
+
+2. 희망 진로, 관심 분야와의 연계성 및 향후 탐색 계획 :
+${item.connection}
+
+3. 성찰 및 다짐 :
+${item.reflection}
+
+4. 특강 연계 진로 심화 탐구 (${typeTags[item.deepdiveType || 'type1']}) :
+${item.deepdive || '작성되지 않음'}
+
+=======================================================`;
+
+        // Generate dynamic file name per student
+        const fileName = `[${item.grade}학년_${item.clazz}반_${item.number}번_${item.name}] 전공진로활동보고서.txt`;
+        zip.file(fileName, fileContent);
+      });
+
+      // Compress and Trigger download
+      zip.generateAsync({ type: "blob" }).then(function (content) {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(content);
+        link.download = `[반석고] 전공진로특강 보고서_일괄수합_총_${list.length}명.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast("📁 학생 개별 파일(TXT)들이 들어있는 ZIP 압축파일이 생성 완료되었습니다!", "📦");
+      });
+    }
+
+    // Combined Single Sheet CSV export for Excel
+    function exportToCSV() {
+      const list = window.submissionsData || [];
+      if (list.length === 0) {
+        showToast("수합 완료된 문서 자료가 없습니다.", "⚠️");
+        return;
+      }
+
+      // Add Excel UTF-8 BOM to prevent Korean encoding breakdown
+      let csvContent = "\uFEFF";
+      csvContent += "학년,반,번호,이름,희망진로,참여학과,요약내용,진로연계,성찰다짐,심화탐구유형,심화탐구내용,제출일시\n";
+
+      list.forEach(item => {
+        // Clean text content to keep CSV syntax valid
+        const clean = str => str ? `"${str.replace(/"/g, '""').replace(/\n/g, ' ')}"` : '""';
+        
+        csvContent += [
+          item.grade,
+          item.clazz,
+          item.number,
+          clean(item.name),
+          clean(item.career),
+          clean(item.subject),
+          clean(item.summary),
+          clean(item.connection),
+          clean(item.reflection),
+          clean(typeTags[item.deepdiveType || 'type1']),
+          clean(item.deepdive || ''),
+          clean(item.submittedAt || '')
+        ].join(",") + "\n";
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `[반석고] 전공진로특강 보고서_통합대장_${list.length}명.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("📈 엑셀 백업용 대장 CSV 파일 다운로드가 시작되었습니다.", "📊");
+    }
+  </script>
+</body>
+</html>
