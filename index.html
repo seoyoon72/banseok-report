@@ -6,7 +6,7 @@
   <title>반석고 전공진로 보고서 작성 및 수합 시스템</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Pretendard Webfont (초깔끔 현대적 서체) -->
+  <!-- Pretendard Webfont (현대적이고 세련된 고급 서체) -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
   <!-- JSZip Library for Zipping files client-side -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -272,7 +272,7 @@
 
               <!-- Block 4 -->
               <div class="border border-slate-900">
-                <div class="bg-slate-50 px-3.5 py-2.5 border-b border-slate-900 font-bold text-[12.5px] text-slate-900 flex justify-between items-center">
+                <div class="bg-slate-50 px-3.5 py-2 border-b border-slate-900 font-bold text-[12.5px] text-slate-900 flex justify-between items-center">
                   <span class="flex items-center gap-2"><span class="text-slate-500">■</span> 특강 연계 진로 심화 탐구</span>
                   <span id="p-type-badge" class="text-[10px] border border-slate-950 px-2.5 py-0.5 font-bold bg-white text-slate-900">진로 일치형 [유형 ①]</span>
                 </div>
@@ -413,19 +413,64 @@
     <p>© 2026 대전반석고등학교 교육과정 박람회 보고서 수합 관리 체계</p>
   </footer>
 
+  <!-- 안전한 동기식 LocalStorage 우선 배치 스크립트 (Firebase 로딩 전 즉각 함수 제공으로 오류 예방) -->
+  <script>
+    const LOCAL_STORAGE_KEY = "banseok_reports_fallback_db";
+    
+    // 로컬 데이터를 안전하게 불러오기
+    function getLocalSubmissions() {
+      try {
+        const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    // 로컬 저장 후 화면 동기화
+    function saveLocalSubmissions(list) {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
+      } catch (e) {}
+      if (window.refreshSubmissions) {
+        window.refreshSubmissions(list);
+      }
+    }
+
+    // 접속하자마자 submitReportToDB 함수를 활성화해 절대 에러가 나지 않도록 이중 가드 설정
+    window.submitReportToDB = async function(docId, payload) {
+      const list = getLocalSubmissions();
+      const existingIdx = list.findIndex(x => x.id === docId);
+      const item = { id: docId, ...payload };
+      if (existingIdx > -1) {
+        list[existingIdx] = item;
+      } else {
+        list.push(item);
+      }
+      saveLocalSubmissions(list);
+    };
+
+    window.deleteSubmissionFromDB = async function(id) {
+      if (confirm("진짜로 이 학생의 보고서 데이터를 영구 삭제하시겠습니까?")) {
+        const list = getLocalSubmissions().filter(x => x.id !== id);
+        saveLocalSubmissions(list);
+        window.showToast("데이터가 영구 삭제되었습니다.", "🗑️");
+      }
+    };
+  </script>
+
   <!-- Firebase & Safe LocalStorage Setup -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
     import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
-    // Global variables (try-catch guard to prevent Github Pages crashes)
     let db = null;
     let auth = null;
     let appId = 'banseok-report-collector';
     let firebaseActive = false;
 
-    // Check if configuration exists
+    // 만약 Canvas 환경에서 환경설정이 주입되었다면 온라인 파이어베이스 활성화
     if (typeof __firebase_config !== 'undefined' && __firebase_config) {
       try {
         const firebaseConfig = JSON.parse(__firebase_config);
@@ -435,62 +480,29 @@
         appId = typeof __app_id !== 'undefined' ? __app_id : 'banseok-report-collector';
         firebaseActive = true;
         console.log("Firebase initialized successfully.");
+
+        // 파이어베이스 온라인용으로 전송 함수 교체
+        window.submitReportToDB = async function(docId, payload) {
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', docId);
+          await setDoc(docRef, payload);
+        };
+
+        window.deleteSubmissionFromDB = async function(id) {
+          if (confirm(`진짜로 이 학생의 보고서 데이터를 영구 삭제하시겠습니까?`)) {
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', id);
+            await deleteDoc(docRef);
+            window.showToast("데이터가 영구 삭제되었습니다.", "🗑️");
+          }
+        };
+
       } catch (err) {
         console.error("Firebase Initialization Error:", err);
       }
-    } else {
-      console.warn("Firebase configuration was not injected. Falling back to offline LocalStorage mode.");
     }
 
     window.isFirebaseActive = firebaseActive;
 
-    // Local Storage Mock Databases for GitHub Pages fallback
-    const LOCAL_STORAGE_KEY = "banseok_reports_fallback_db";
-    function getLocalSubmissions() {
-      const data = localStorage.getItem(LOCAL_STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
-    }
-    function saveLocalSubmissions(list) {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
-      // Trigger a visual update
-      window.refreshSubmissions(list);
-    }
-
-    // Set fallback function for offline deployment
-    window.submitReportToDB = async function(docId, payload) {
-      if (firebaseActive && db) {
-        // Online Firebase saving
-        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', docId);
-        await setDoc(docRef, payload);
-      } else {
-        // Offline LocalStorage saving
-        const list = getLocalSubmissions();
-        const existingIdx = list.findIndex(x => x.id === docId);
-        const item = { id: docId, ...payload };
-        
-        if (existingIdx > -1) {
-          list[existingIdx] = item;
-        } else {
-          list.push(item);
-        }
-        saveLocalSubmissions(list);
-      }
-    };
-
-    window.deleteSubmissionFromDB = async function(id) {
-      if (confirm(`진짜로 이 학생의 보고서 데이터를 영구 삭제하시겠습니까?`)) {
-        if (firebaseActive && db) {
-          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', id);
-          await deleteDoc(docRef);
-        } else {
-          const list = getLocalSubmissions().filter(x => x.id !== id);
-          saveLocalSubmissions(list);
-        }
-        window.showToast("데이터가 영구 삭제되었습니다.", "🗑️");
-      }
-    };
-
-    // Firebase Auth login and live syncing listener
+    // Firebase Auth가 로그인되면 실시간 데이터 구독 시작
     if (firebaseActive && auth) {
       const initAuthAndSync = async () => {
         try {
@@ -512,7 +524,6 @@
                 list.push({ id: doc.id, ...doc.data() });
               });
               
-              // Sort list in memory
               list.sort((a, b) => {
                 if (a.grade !== b.grade) return Number(a.grade) - Number(b.grade);
                 if (a.clazz !== b.clazz) return Number(a.clazz) - Number(b.clazz);
@@ -528,7 +539,7 @@
       };
       initAuthAndSync();
     } else {
-      // Local Database initial loading on local/offline mode
+      // 파이어베이스가 없는 외부 깃허브 배포 모드일 경우 오프라인 로컬 저장소 즉각 연동
       setTimeout(() => {
         const localList = getLocalSubmissions();
         localList.sort((a, b) => {
@@ -541,13 +552,12 @@
     }
   </script>
 
-  <!-- Control & Interface Logic Script -->
+  <!-- Control & Interface Logic Script (끊김 없는 최종 완벽 릴리즈) -->
   <script>
     let activeType = 'type1';
     let activeTab = 'student';
     let isTeacherUnlocked = false;
 
-    // Descriptions matching school criteria
     const typeDescriptions = {
       type1: "<strong>① [진로 일치형]</strong> 이번 특강이 내 진로와 잘 맞는 경우: 특강 내용 중 더 깊이 알고 싶은 핵심 개념이나 기술을 선정하여, 관련 전공 도서나 학술 기사를 찾아 읽고 심화 탐구한 내용을 적어주세요.",
       type2: "<strong>② [진로 융합형]</strong> 희망 학과가 아니었거나 차선책으로 들은 경우: 이번 특강 주제와 '본인의 진짜 관심 분야'를 연결할 수 있는 융합 주제를 고민해 보세요. 관련 매체를 찾아 두 분야가 어떻게 시너지를 낼 수 있는지 기술합니다.",
@@ -560,14 +570,12 @@
       type3: "진로 탐색형 [유형 ③]"
     };
 
-    // Global reference updater
     window.refreshSubmissions = function(list) {
       window.submissionsData = list;
       renderDashboardList(list);
       updateStatistics(list);
     };
 
-    // Tab switcher
     function switchTab(tab) {
       activeTab = tab;
       const sTab = document.getElementById('tab-student');
@@ -596,7 +604,6 @@
       }
     }
 
-    // Unlock Admin Module
     function unlockDashboard() {
       const pass = document.getElementById('teacher-pass').value;
       if (pass === 'banseok' || pass === '1234') {
@@ -610,7 +617,6 @@
       }
     }
 
-    // Change deepdive option selection
     function changeDeepdiveType(type) {
       activeType = type;
       ['type1', 'type2', 'type3'].forEach((t, i) => {
@@ -627,7 +633,6 @@
       onFormChange();
     }
 
-    // Live sync fields to HWP-style preview
     function onFormChange() {
       const g = document.getElementById('grade').value || "　";
       const c = document.getElementById('class').value || "　";
@@ -655,7 +660,6 @@
       document.getElementById('p-deepdive').innerHTML = deepdive ? escapeHtml(deepdive) : '<span class="text-slate-400 italic">내용이 비어 있습니다. (선택탐구 작성 가능)</span>';
     }
 
-    // Helper for encoding HTML
     function escapeHtml(text) {
       return text
         .replace(/&/g, "&amp;")
@@ -666,7 +670,6 @@
         .replace(/\n/g, "<br>");
     }
 
-    // Copy Raw Plain text representation
     function copyRawText() {
       const grade = document.getElementById('grade').value || " ";
       const clazz = document.getElementById('class').value || " ";
@@ -709,7 +712,6 @@ ${deepdive}`;
       document.body.removeChild(t);
     }
 
-    // Submit report 
     async function submitReport() {
       const g = document.getElementById('grade').value.trim();
       const c = document.getElementById('class').value.trim();
@@ -756,7 +758,7 @@ ${deepdive}`;
           }
           showToast(successMsg, "📥");
         } else {
-          throw new Error("데이터 전송 엔진이 활성화되지 않았습니다.");
+          throw new Error("데이터 전송 엔진이 아직 완벽히 준비되지 않았습니다.");
         }
       } catch (err) {
         showToast("제출 실패: " + err.message, "❌");
@@ -765,7 +767,6 @@ ${deepdive}`;
       }
     }
 
-    // Toast alarm controller
     function showToast(message, icon = "✨") {
       const toast = document.getElementById('toast');
       document.getElementById('toast-icon').innerText = icon;
@@ -778,7 +779,6 @@ ${deepdive}`;
     }
     window.showToast = showToast;
 
-    // Prefill demo data
     function fillSample() {
       document.getElementById('grade').value = 2;
       document.getElementById('class').value = 4;
@@ -797,7 +797,6 @@ ${deepdive}`;
       showToast("예시가 성공적으로 입력되었습니다!");
     }
 
-    // Teacher Dashboard rendering list
     function renderDashboardList(list) {
       const tbody = document.getElementById('submission-list');
       if (!tbody) return;
@@ -847,7 +846,6 @@ ${deepdive}`;
       renderDashboardList(window.submissionsData || []);
     }
 
-    // Load data back to preview
     function loadToPreview(docId) {
       const item = (window.submissionsData || []).find(x => x.id === docId);
       if (!item) return;
@@ -875,7 +873,6 @@ ${deepdive}`;
       }
     }
 
-    // Update charts & stats widgets
     function updateStatistics(list) {
       const totalSpan = document.getElementById('stat-total');
       if (totalSpan) totalSpan.innerText = list.length;
@@ -905,7 +902,6 @@ ${deepdive}`;
       topSpan.innerText = topClass;
     }
 
-    // One-click batch gather as a multi-file ZIP archive
     function downloadAllAsZip() {
       const list = window.submissionsData || [];
       if (list.length === 0) {
@@ -954,7 +950,6 @@ ${item.deepdive || '작성되지 않음'}
       });
     }
 
-    // Single-sheet spreadsheet CSV downloader for Excel
     function exportToCSV() {
       const list = window.submissionsData || [];
       if (list.length === 0) {
