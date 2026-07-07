@@ -127,7 +127,7 @@
             <div>
               <label class="block text-[11px] font-bold text-slate-600 mb-1 flex justify-between">
                 <span>1. 활동 내용 요약 및 가장 흥미로웠던 점 *</span>
-                <span class="text-[10px] text-slate-400 font-normal">구체적 학습 및 호기심 내용</span>
+                <span class="text-[10px] text-slate-400 font-normal">구체적 배움 및 호기심 내용 기술</span>
               </label>
               <textarea id="summary" rows="4" oninput="onFormChange()" placeholder="특강 내용 중 가장 기억에 남는 핵심 개념이나 대학생 선배들의 멘토링 내용(대학 생활, 전공 공부 등)을 요약하고, 본인의 호기심을 가장 자극했던 부분을 구체적으로 기술하세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 focus:outline-none leading-relaxed"></textarea>
             </div>
@@ -541,7 +541,7 @@
     }
   </script>
 
-  <!-- Control & Interface Logic Script (Complete & Un-truncated) -->
+  <!-- Control & Interface Logic Script -->
   <script>
     let activeType = 'type1';
     let activeTab = 'student';
@@ -666,7 +666,7 @@
         .replace(/\n/g, "<br>");
     }
 
-    // Copy Raw Plain text representation (Robust copy implementation without truncation!)
+    // Copy Raw Plain text representation
     function copyRawText() {
       const grade = document.getElementById('grade').value || " ";
       const clazz = document.getElementById('class').value || " ";
@@ -709,7 +709,7 @@ ${deepdive}`;
       document.body.removeChild(t);
     }
 
-    // Submit payload to Firestore or LocalStorage
+    // Submit report 
     async function submitReport() {
       const g = document.getElementById('grade').value.trim();
       const c = document.getElementById('class').value.trim();
